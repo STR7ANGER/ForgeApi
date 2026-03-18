@@ -8,7 +8,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum OrgRole {
@@ -18,14 +17,15 @@ enum OrgRole {
 }
 
 model User {
-  id           String      @id @default(cuid())
-  email        String      @unique
+  id           String          @id @default(cuid())
+  email        String          @unique
   passwordHash String
   name         String?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
 
   memberships  OrgMember[]
+  refreshTokens RefreshToken[]
 }
 
 model Org {
@@ -51,4 +51,17 @@ model OrgMember {
   @@unique([userId, orgId])
   @@index([orgId])
   @@index([userId])
+}
+
+model RefreshToken {
+  id        String   @id
+  userId    String
+  revokedAt DateTime?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }
