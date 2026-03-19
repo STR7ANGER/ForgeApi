@@ -154,3 +154,27 @@ sellerApisRouter.patch('/:id', requireAuth, requireOrgRole(['OWNER', 'ADMIN']), 
 
   return res.status(200).json({ listing });
 });
+
+sellerApisRouter.post('/:id/publish', requireAuth, requireOrgRole(['OWNER', 'ADMIN']), async (req, res) => {
+  const orgId = req.orgId as string;
+  const listingId = req.params.id;
+
+  const existing = await prisma.apiListing.findFirst({
+    where: { id: listingId, orgId },
+  });
+
+  if (!existing) {
+    return res.status(404).json({ error: 'Listing not found' });
+  }
+
+  if (existing.status === 'PUBLISHED') {
+    return res.status(200).json({ listing: existing });
+  }
+
+  const listing = await prisma.apiListing.update({
+    where: { id: existing.id },
+    data: { status: 'PUBLISHED' },
+  });
+
+  return res.status(200).json({ listing });
+});
