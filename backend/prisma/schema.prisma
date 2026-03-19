@@ -21,6 +21,11 @@ enum ApiStatus {
   PUBLISHED
 }
 
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+}
+
 model User {
   id            String          @id @default(cuid())
   email         String          @unique
@@ -31,6 +36,7 @@ model User {
 
   memberships   OrgMember[]
   refreshTokens RefreshToken[]
+  subscriptions Subscription[]
 }
 
 model Org {
@@ -103,6 +109,7 @@ model ApiListing {
   org         Org         @relation(fields: [orgId], references: [id], onDelete: Cascade)
   category    Category?   @relation(fields: [categoryId], references: [id])
   tags        ApiListingTag[]
+  subscriptions Subscription[]
 
   @@index([orgId])
   @@index([categoryId])
@@ -117,4 +124,20 @@ model ApiListingTag {
 
   @@id([listingId, tagId])
   @@index([tagId])
+}
+
+model Subscription {
+  id         String             @id @default(cuid())
+  userId     String
+  listingId  String
+  status     SubscriptionStatus @default(ACTIVE)
+  startedAt  DateTime           @default(now())
+  endedAt    DateTime?
+
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing  ApiListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, listingId])
+  @@index([listingId])
+  @@index([userId])
 }
