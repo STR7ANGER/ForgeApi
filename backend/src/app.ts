@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { healthRouter } from './routes/health';
 import { authRouter } from './routes/auth';
+import { sellerApisRouter } from './routes/seller/apis';
 import './config/env';
 
 export const app = express();
@@ -11,3 +12,4 @@ app.use(express.json());
 
 app.use('/health', healthRouter);
 app.use('/auth', authRouter);
+app.use('/seller/apis', sellerApisRouter);
