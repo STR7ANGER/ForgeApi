@@ -65,3 +65,24 @@ marketplaceRouter.get('/apis', async (req, res) => {
     total,
   });
 });
+
+marketplaceRouter.get('/apis/:idOrSlug', async (req, res) => {
+  const idOrSlug = req.params.idOrSlug;
+
+  const listing = await prisma.apiListing.findFirst({
+    where: {
+      status: 'PUBLISHED',
+      OR: [{ id: idOrSlug }, { slug: idOrSlug }],
+    },
+    include: {
+      category: true,
+      tags: { include: { tag: true } },
+    },
+  });
+
+  if (!listing) {
+    return res.status(404).json({ error: 'Listing not found' });
+  }
+
+  return res.status(200).json({ listing });
+});
