@@ -47,3 +47,28 @@ consumerSubscriptionsRouter.post('/subscribe', requireAuth, async (req, res) => 
 
   return res.status(201).json({ subscription });
 });
+
+consumerSubscriptionsRouter.post('/unsubscribe', requireAuth, async (req, res) => {
+  const parse = subscribeSchema.safeParse(req.body);
+  if (!parse.success) {
+    return res.status(400).json({ error: 'Invalid payload' });
+  }
+
+  const userId = req.user!.id;
+  const listingId = parse.data.listingId;
+
+  const existing = await prisma.subscription.findUnique({
+    where: { userId_listingId: { userId, listingId } },
+  });
+
+  if (!existing || existing.status === 'CANCELED') {
+    return res.status(200).json({ subscription: existing ?? null });
+  }
+
+  const subscription = await prisma.subscription.update({
+    where: { id: existing.id },
+    data: { status: 'CANCELED', endedAt: new Date() },
+  });
+
+  return res.status(200).json({ subscription });
+});
