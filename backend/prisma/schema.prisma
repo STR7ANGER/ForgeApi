@@ -37,6 +37,7 @@ model User {
   memberships   OrgMember[]
   refreshTokens RefreshToken[]
   subscriptions Subscription[]
+  apiKeys       ApiKey[]
 }
 
 model Org {
@@ -96,20 +97,21 @@ model Tag {
 }
 
 model ApiListing {
-  id          String      @id @default(cuid())
-  orgId       String
-  name        String
-  slug        String      @unique
-  description String?
-  status      ApiStatus   @default(DRAFT)
-  categoryId  String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id           String      @id @default(cuid())
+  orgId        String
+  name         String
+  slug         String      @unique
+  description  String?
+  status       ApiStatus   @default(DRAFT)
+  categoryId   String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
-  org         Org         @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  category    Category?   @relation(fields: [categoryId], references: [id])
-  tags        ApiListingTag[]
+  org          Org         @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  category     Category?   @relation(fields: [categoryId], references: [id])
+  tags         ApiListingTag[]
   subscriptions Subscription[]
+  apiKeys      ApiKey[]
 
   @@index([orgId])
   @@index([categoryId])
@@ -140,4 +142,21 @@ model Subscription {
   @@unique([userId, listingId])
   @@index([listingId])
   @@index([userId])
+}
+
+model ApiKey {
+  id        String   @id @default(cuid())
+  userId    String
+  listingId String
+  name      String?
+  keyHash   String   @unique
+  lastFour  String
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing  ApiListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([listingId])
 }
