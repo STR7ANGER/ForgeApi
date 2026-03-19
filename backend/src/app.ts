@@ -4,7 +4,7 @@ import { healthRouter } from './routes/health';
 import { authRouter } from './routes/auth';
 import { sellerApisRouter } from './routes/seller/apis';
 import { marketplaceRouter } from './routes/marketplace';
-import { consumerSubscriptionsRouter } from './routes/consumer/subscriptions';
+import { consumerRouter } from './routes/consumer';
 import './config/env';
 
 export const app = express();
@@ -16,4 +16,4 @@ app.use('/health', healthRouter);
 app.use('/auth', authRouter);
 app.use('/seller/apis', sellerApisRouter);
 app.use('/marketplace', marketplaceRouter);
-app.use('/consumer', consumerSubscriptionsRouter);
+app.use('/consumer', consumerRouter);
