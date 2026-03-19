@@ -16,26 +16,32 @@ enum OrgRole {
   MEMBER
 }
 
-model User {
-  id           String          @id @default(cuid())
-  email        String          @unique
-  passwordHash String
-  name         String?
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
+enum ApiStatus {
+  DRAFT
+  PUBLISHED
+}
 
-  memberships  OrgMember[]
+model User {
+  id            String          @id @default(cuid())
+  email         String          @unique
+  passwordHash  String
+  name          String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  memberships   OrgMember[]
   refreshTokens RefreshToken[]
 }
 
 model Org {
-  id        String      @id @default(cuid())
+  id        String       @id @default(cuid())
   name      String
-  slug      String      @unique
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  slug      String       @unique
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 
   members   OrgMember[]
+  listings  ApiListing[]
 }
 
 model OrgMember {
@@ -64,4 +70,51 @@ model RefreshToken {
 
   @@index([userId])
   @@index([expiresAt])
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+
+  listings  ApiListing[]
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  listings  ApiListingTag[]
+}
+
+model ApiListing {
+  id          String      @id @default(cuid())
+  orgId       String
+  name        String
+  slug        String      @unique
+  description String?
+  status      ApiStatus   @default(DRAFT)
+  categoryId  String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  org         Org         @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  category    Category?   @relation(fields: [categoryId], references: [id])
+  tags        ApiListingTag[]
+
+  @@index([orgId])
+  @@index([categoryId])
+}
+
+model ApiListingTag {
+  listingId String
+  tagId     String
+
+  listing ApiListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  tag     Tag        @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([listingId, tagId])
+  @@index([tagId])
 }
