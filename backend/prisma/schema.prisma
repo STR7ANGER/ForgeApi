@@ -112,6 +112,7 @@ model ApiListing {
   tags         ApiListingTag[]
   subscriptions Subscription[]
   apiKeys      ApiKey[]
+  usageLogs    UsageLog[]
 
   @@index([orgId])
   @@index([categoryId])
@@ -145,18 +146,39 @@ model Subscription {
 }
 
 model ApiKey {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
   listingId String
   name      String?
-  keyHash   String   @unique
+  keyHash   String    @unique
   lastFour  String
   revokedAt DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   listing  ApiListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  usageLogs UsageLog[]
 
   @@index([userId])
   @@index([listingId])
+}
+
+model UsageLog {
+  id         String   @id @default(cuid())
+  listingId  String
+  apiKeyId   String?
+  statusCode Int
+  latencyMs  Int
+  path       String
+  method     String
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  listing ApiListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  apiKey  ApiKey?    @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
+
+  @@index([listingId])
+  @@index([apiKeyId])
+  @@index([createdAt])
 }
