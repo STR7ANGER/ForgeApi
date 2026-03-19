@@ -5,6 +5,7 @@ import { authRouter } from './routes/auth';
 import { sellerApisRouter } from './routes/seller/apis';
 import { marketplaceRouter } from './routes/marketplace';
 import { consumerRouter } from './routes/consumer';
+import { usageRouter } from './routes/usage';
 import './config/env';
 
 export const app = express();
@@ -17,3 +18,4 @@ app.use('/auth', authRouter);
 app.use('/seller/apis', sellerApisRouter);
 app.use('/marketplace', marketplaceRouter);
 app.use('/consumer', consumerRouter);
+app.use('/usage', usageRouter);
